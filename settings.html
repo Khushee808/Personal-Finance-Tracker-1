@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Settings</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav><b>🌿 Personal Finance Tracker</b>
+        <div><a href="index.html">Dashboard</a><a href="history.html">Transactions</a><a
+                href="reports.html">Reports</a><a href="settings.html">Settings</a><a href="#" id="logout">Logout</a>
+        </div>
+    </nav>
+    <main>
+        <h1>Settings</h1>
+        <section class="panel">
+            <h2>Budget & Savings Goals</h2>
+            <div class="settings-grid"><label>Monthly Budget <input id="b" type="number" min="0"></label><label>Savings
+                    Goal <input id="g" type="number" min="0"></label></div>
+            <hr>
+            <h2>Category Budgets</h2>
+            <div id="categoryBudgets" class="settings-grid"></div>
+            <hr>
+            <h2>Appearance</h2><label><input id="d" type="checkbox"> Enable Dark Mode</label>
+            <br><button id="saveSettings">Save Settings</button> <button id="reset" class="danger">Reset
+                Transactions</button>
+        </section>
+        <section class="panel">
+            <h2>Backup & Restore</h2>
+            <p>Save your transactions and settings as a backup file, or restore them later.</p>
+            <button id="exportBackup">Export Backup</button>
+            <label class="filebtn">Import Backup <input id="importBackup" type="file" accept=".json" hidden></label>
+        </section>
+    </main>
+    <script src="app.js"></script>
+    <script>
+        const cats = ["Food", "Travel", "Shopping", "Bills", "Education", "Health", "Salary", "Other"];
+        b.value = settings.budget || 0; g.value = settings.goal || 0; d.checked = !!settings.dark;
+        const cb = document.getElementById("categoryBudgets");
+        cats.forEach(c => { let v = (settings.categoryBudgets || {})[c] || 0; cb.insertAdjacentHTML("beforeend", `<label>${c} Budget <input class="catbudget" data-cat="${c}" type="number" min="0" value="${v}"></label>`) });
+        document.getElementById("saveSettings").onclick = () => { settings.budget = +b.value; settings.goal = +g.value; settings.dark = d.checked; settings.categoryBudgets = {}; document.querySelectorAll(".catbudget").forEach(x => settings.categoryBudgets[x.dataset.cat] = +x.value); save(); document.body.classList.toggle("dark", settings.dark); alert("Settings saved successfully."); location.reload() };
+        document.getElementById("reset").onclick = () => { if (confirm("Reset all transactions?")) { data = []; save(); location.reload() } };
+        document.getElementById("exportBackup").onclick = () => { let backup = { version: 1, transactions: data, settings: settings }; let a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" })); a.download = "personal-finance-backup.json"; a.click() };
+        document.getElementById("importBackup").onchange = e => { let f = e.target.files[0]; if (!f) return; let r = new FileReader(); r.onload = () => { try { let x = JSON.parse(r.result); if (!Array.isArray(x.transactions) || !x.settings) throw 0; data = x.transactions; settings = x.settings; save(); alert("Backup restored successfully."); location.reload() } catch (err) { alert("Invalid backup file.") } }; r.readAsText(f) };
+    </script>
+</body>
+
+</html>

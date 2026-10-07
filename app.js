@@ -1,0 +1,37 @@
+const K = "pft_v4", U = "pft_users_v4", S = "pft_settings_v4";
+let data = JSON.parse(localStorage.getItem(K) || "[]"), users = JSON.parse(localStorage.getItem(U) || "{}"), settings = JSON.parse(localStorage.getItem(S) || '{"budget":0,"goal":0,"dark":false,"categoryBudgets":{}}');
+const $ = x => document.getElementById(x);
+function current() { return localStorage.getItem("pft_current_v4") }
+function money(n) { return "₹" + Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
+function save() { localStorage.setItem(K, JSON.stringify(data)); localStorage.setItem(S, JSON.stringify(settings)) }
+function applyTheme() { document.body.classList.toggle("dark", !!settings.dark) }
+applyTheme();
+if ($("logout")) $("logout").onclick = e => { e.preventDefault(); localStorage.removeItem("pft_current_v4"); location.href = "login.html" };
+let page = location.pathname.split("/").pop();
+if (!current() && page != "login.html" && page != "register.html") location.href = "login.html";
+
+if ($("user")) {
+    $("user").textContent = current();
+    $("budget").textContent = money(settings.budget || 0); $("goal").textContent = money(settings.goal || 0);
+    let inc = data.filter(x => x.type == "Income").reduce((a, x) => a + x.amount, 0), exp = data.filter(x => x.type == "Expense").reduce((a, x) => a + x.amount, 0);
+    let now = new Date().toISOString().slice(0, 7), me = data.filter(x => x.type == "Expense" && x.date.startsWith(now)).reduce((a, x) => a + x.amount, 0), bal = inc - exp;
+    $("income").textContent = money(inc); $("expense").textContent = money(exp); $("balance").textContent = money(bal); $("month").textContent = money(me); $("saving").textContent = money(bal);
+    let bp = settings.budget ? Math.min(100, me / settings.budget * 100) : 0; $("usage").textContent = bp.toFixed(1) + "% of budget used"; $("progress").style.width = bp + "%";
+    let sp = settings.goal ? Math.min(100, Math.max(0, bal) / settings.goal * 100) : 0; if ($("saveprogress")) $("saveprogress").style.width = sp + "%";
+    drawIncomeExpense(inc, exp); drawCategories(data); drawCategoryStatus(data); drawInsights(inc, exp, me, bal); drawRecent();
+}
+function drawIncomeExpense(inc, exp) { let c = $("incomeExpenseChart"); if (!c) return; let x = c.getContext("2d"), w = c.width, h = c.height; x.clearRect(0, 0, w, h); x.strokeStyle = "#dce5e0"; for (let i = 0; i < 5; i++) { let y = 35 + i * 55; x.beginPath(); x.moveTo(55, y); x.lineTo(w - 25, y); x.stroke() } let max = Math.max(inc, exp, 100), scale = 180 / max, bw = 80; x.fillStyle = "#2c8b67"; x.fillRect(150, 250 - inc * scale, bw, inc * scale); x.fillStyle = "#d85b5b"; x.fillRect(350, 250 - exp * scale, bw, exp * scale); x.fillStyle = getComputedStyle(document.body).color; x.font = "14px Arial"; x.textAlign = "center"; x.fillText("Income", 190, 275); x.fillText("Expense", 390, 275); x.fillText(money(inc), 190, Math.max(18, 245 - inc * scale)); x.fillText(money(exp), 390, Math.max(18, 245 - exp * scale)) }
+function drawCategories(arr) { let c = $("categoryChart"); if (!c) return; let x = c.getContext("2d"), w = c.width, h = c.height; x.clearRect(0, 0, w, h); let cats = {}; arr.filter(a => a.type == "Expense").forEach(a => cats[a.cat] = (cats[a.cat] || 0) + a.amount); let entries = Object.entries(cats), total = entries.reduce((a, b) => a + b[1], 0); if (!total) { x.fillStyle = getComputedStyle(document.body).color; x.font = "18px Arial"; x.textAlign = "center"; x.fillText("No expenses yet", w / 2, h / 2); $("catLegend").innerHTML = ""; return } let colors = ["#e86a6a", "#f2b84b", "#4f8fd8", "#54a77d", "#8d70d5", "#df7fba", "#6c9a8b", "#d58b45"], cx = 230, cy = 145, r = 105, start = -Math.PI / 2; entries.forEach((e, i) => { let a = e[1] / total * Math.PI * 2; x.beginPath(); x.moveTo(cx, cy); x.arc(cx, cy, r, start, start + a); x.closePath(); x.fillStyle = colors[i % colors.length]; x.fill(); start += a }); x.beginPath(); x.arc(cx, cy, 50, 0, Math.PI * 2); x.fillStyle = getComputedStyle(document.body).backgroundColor; x.fill(); x.fillStyle = getComputedStyle(document.body).color; x.font = "bold 15px Arial"; x.textAlign = "center"; x.fillText(money(total), cx, cy + 5); $("catLegend").innerHTML = entries.map((e, i) => `<span><i class="dot" style="background:${colors[i % colors.length]}"></i>${e[0]} ${Math.round(e[1] / total * 100)}%</span>`).join("") }
+function drawCategoryStatus(arr) { let el = $("categoryStatus"); if (!el) return; let cats = {}; arr.filter(x => x.type == "Expense").forEach(x => cats[x.cat] = (cats[x.cat] || 0) + x.amount); let budgets = settings.categoryBudgets || {}, all = [...new Set([...Object.keys(cats), ...Object.keys(budgets)])]; el.innerHTML = all.map(c => { let used = cats[c] || 0, b = budgets[c] || 0, p = b ? Math.min(100, used / b * 100) : 0, cls = b && used > b ? "over" : ""; return `<div class="status"><div class="statusline"><span>${c}</span><span>${money(used)}${b ? " / " + money(b) : ""}</span></div>${b ? `<div class="mini-progress ${cls}"><i style="width:${p}%"></i></div>` : "<small>No category budget set</small>"}</div>` }).join("") || "No category budgets set. Add them from Settings." }
+function drawRecent() {
+    let el = $("recentRows"); if (!el) return;
+    let recent = data.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+    el.innerHTML = recent.map(x => `<tr><td>${x.date}</td><td>${x.type}</td><td>${x.cat}</td><td>${x.desc}</td><td>${money(x.amount)}</td></tr>`).join("") ||
+        '<tr><td colspan="5">No transactions yet.</td></tr>';
+}
+
+function drawInsights(inc, exp, me, bal) { let el = $("insights"); if (!el) return; let out = []; if (inc > 0) out.push(`Your savings rate is <b>${Math.max(0, bal / inc * 100).toFixed(1)}%</b>.`); if (settings.budget && me >= settings.budget * .8) out.push(`<span class="alert">⚠️ You have used ${Math.round(me / settings.budget * 100)}% of your monthly budget.</span>`); let cats = {}; data.filter(x => x.type == "Expense").forEach(x => cats[x.cat] = (cats[x.cat] || 0) + x.amount); let top = Object.entries(cats).sort((a, b) => b[1] - a[1])[0]; if (top) out.push(`Your highest spending category is <b>${top[0]}</b> (${money(top[1])}).`); if (settings.goal && bal >= settings.goal) out.push(`<span class="alert success">🎯 Great! Your savings goal has been reached.</span>`); else if (settings.goal && bal > 0) out.push(`You are <b>${(bal / settings.goal * 100).toFixed(1)}%</b> toward your savings goal.`); el.innerHTML = out.map(x => `<div class="insight">💡 ${x}</div>`).join("") || "Add transactions to see smart insights." }
+if ($("form")) $("form").onsubmit = e => { e.preventDefault(); data.push({ date: $("date").value, desc: $("desc").value, cat: $("cat").value, amount: +$("amount").value, type: $("type").value, recurring: $("recurring").checked }); save(); location.reload() };
+if ($("date")) $("date").value = new Date().toISOString().slice(0, 10);
+if ($("register")) $("register").onsubmit = e => { e.preventDefault(); let n = $("name").value.trim(), p = $("pass").value; if (users[n]) return $("err").textContent = "Username already exists."; users[n] = p; localStorage.setItem(U, JSON.stringify(users)); localStorage.setItem("pft_current_v4", n); location.href = "index.html" };
+if ($("login")) $("login").onsubmit = e => { e.preventDefault(); let n = $("email").value.trim(), p = $("pass").value; if (users[n] === p) { localStorage.setItem("pft_current_v4", n); location.href = "index.html" } else $("err").textContent = "Invalid username or password." };

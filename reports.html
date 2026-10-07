@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Reports</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav><b>🌿 Personal Finance Tracker</b>
+        <div><a href="index.html">Dashboard</a><a href="history.html">Transactions</a><a
+                href="reports.html">Reports</a><a href="settings.html">Settings</a><a href="#" id="logout">Logout</a>
+        </div>
+    </nav>
+    <main>
+        <h1>Reports</h1><button onclick="window.print()">Download / Print PDF</button><button onclick="csv()">Download
+            CSV</button>
+        <section class="panel">
+            <h2>Monthly Summary</h2>
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Income</th>
+                        <th>Expense</th>
+                        <th>Savings</th>
+                    </tr>
+                </thead>
+                <tbody id="summary"></tbody>
+            </table>
+        </section>
+    </main>
+    <script src="app.js"></script>
+    <script>let m = {}; data.forEach(x => { let k = x.date.slice(0, 7); m[k] ??= { i: 0, e: 0 }; m[k][x.type == "Income" ? "i" : "e"] += x.amount }); document.getElementById("summary").innerHTML = Object.entries(m).map(([k, v]) => `<tr><td>${k}</td><td>${money(v.i)}</td><td>${money(v.e)}</td><td>${money(v.i - v.e)}</td></tr>`).join("") || "<tr><td colspan=4>No data.</td></tr>"; function csv() { let s = "Date,Type,Category,Description,Amount\n" + data.map(x => `${x.date},${x.type},${x.cat},${x.desc},${x.amount}`).join("\n"), a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([s], { type: "text/csv" })); a.download = "finance_report.csv"; a.click() }</script>
+</body>
+
+</html>

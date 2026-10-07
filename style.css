@@ -1,0 +1,307 @@
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #edf4f1;
+    color: #1f2d28
+}
+
+nav {
+    background: #12382b;
+    color: white;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 16px;
+    font-size: 14px
+}
+
+main {
+    max-width: 1150px;
+    margin: auto;
+    padding: 30px 20px
+}
+
+h1 {
+    font-size: 34px
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px
+}
+
+.cards>div,
+.panel {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 18px #163d2b12;
+    margin-bottom: 20px
+}
+
+.cards small {
+    color: #65736d
+}
+
+.cards strong {
+    display: block;
+    font-size: 25px;
+    margin-top: 7px
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px
+}
+
+form {
+    display: grid;
+    gap: 11px
+}
+
+input,
+select {
+    padding: 11px;
+    border: 1px solid #cbd8d2;
+    border-radius: 7px;
+    background: white;
+    font: inherit
+}
+
+button {
+    background: #176b45;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    padding: 11px 16px;
+    cursor: pointer
+}
+
+.progress {
+    height: 10px;
+    background: #e5ece8;
+    border-radius: 20px;
+    overflow: hidden
+}
+
+.progress i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: #2c8b67
+}
+
+.charts .panel {
+    min-height: 390px
+}
+
+.chartbox {
+    height: 290px;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.chartbox canvas {
+    max-width: 100%;
+    height: auto
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 13px
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #71807a
+}
+
+.dark {
+    background: #101814;
+    color: #e8efeb
+}
+
+.dark .panel,
+.dark .cards>div {
+    background: #18241f;
+    color: #e8efeb
+}
+
+.dark input,
+.dark select {
+    background: #101814;
+    color: #e8efeb
+}
+
+@media(max-width:800px) {
+
+    .cards,
+    .grid {
+        grid-template-columns: 1fr 1fr
+    }
+}
+
+@media(max-width:550px) {
+
+    .cards,
+    .grid {
+        grid-template-columns: 1fr
+    }
+
+    nav div {
+        width: 100%
+    }
+
+    nav a {
+        margin: 0 9px 0 0
+    }
+
+    .charts .panel {
+        min-height: 350px
+    }
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #dce5e0;
+    margin: 22px 0
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px
+}
+
+.settings-grid label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px
+}
+
+.filebtn {
+    display: inline-block;
+    background: #176b45;
+    color: #fff;
+    border-radius: 8px;
+    padding: 11px 16px;
+    cursor: pointer;
+    margin-left: 8px
+}
+
+.alert {
+    padding: 12px 15px;
+    border-radius: 9px;
+    margin: 8px 0;
+    background: #fff1d6;
+    color: #805b00;
+    border-left: 5px solid #e6a72d
+}
+
+.success {
+    background: #e3f5e9;
+    color: #176b45;
+    border-left-color: #2c8b67
+}
+
+.status {
+    margin: 12px 0
+}
+
+.statusline {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 5px
+}
+
+.mini-progress {
+    height: 9px;
+    background: #e6ece9;
+    border-radius: 20px;
+    overflow: hidden
+}
+
+.mini-progress i {
+    display: block;
+    height: 100%;
+    background: #2c8b67
+}
+
+.over i {
+    background: #d85b5b
+}
+
+.insight {
+    padding: 10px 0;
+    border-bottom: 1px solid #e4ebe7
+}
+
+.insight:last-child {
+    border-bottom: 0
+}
+
+@media(max-width:650px) {
+    .settings-grid {
+        grid-template-columns: 1fr
+    }
+}
+
+.recent-panel {
+    margin-top: 0
+}
+
+.recent-panel table {
+    width: 100%;
+    border-collapse: collapse
+}
+
+.recent-panel th,
+.recent-panel td {
+    padding: 12px;
+    border-bottom: 1px solid #e4ebe7;
+    text-align: left
+}
+
+.viewall {
+    display: inline-block;
+    margin-top: 14px;
+    background: #176b45;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 10px 16px
+}
